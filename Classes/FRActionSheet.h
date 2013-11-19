@@ -31,6 +31,15 @@ typedef void(^FRActionSheetHandlerBlock)(FRActionSheet *sheet, NSInteger idx);
 ///The decorator object
 @property (nonatomic,weak) id<FRActionSheetDecorator>decorator;
 
+///The button titles
+@property (nonatomic,copy,readonly) NSArray *buttonTitles;
+
+///The sheet title
+@property (nonatomic,copy,readonly) NSString *sheetTitle;
+
+///The name of the nib
+@property (nonatomic,copy,readonly) NSString *nibName;
+
 ///Sheet background color
 @property (nonatomic,copy) UIColor *sheetBackgroundColor;
 

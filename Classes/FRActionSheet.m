@@ -10,9 +10,9 @@
 
 @property (nonatomic,weak) UIView *sheetView;
 
-@property (nonatomic,copy) NSString *nibName;
-@property (nonatomic,copy) NSArray *buttonTitles;
-@property (nonatomic,copy) NSString *sheetTitle;
+@property (nonatomic,copy,readwrite) NSString *nibName;
+@property (nonatomic,copy,readwrite) NSArray *buttonTitles;
+@property (nonatomic,copy,readwrite) NSString *sheetTitle;
 
 @property (nonatomic,copy) FRActionSheetHandlerBlock handlerBlock;
 
@@ -130,19 +130,19 @@
 {
  
     NSDictionary *views;
-    NSDictionary *metrics = @{@"margin":@10};
+    NSDictionary *metrics = @{@"margin":@20};
     UIButton *button;
     
     [titleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[titleLabel]-|"
+    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==margin)-[titleLabel]-(==margin)-|"
                                                                       options:0
-                                                                      metrics:nil
+                                                                      metrics:metrics
                                                                         views:NSDictionaryOfVariableBindings(titleLabel)]];
     
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[titleLabel]"
+    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(==margin)-[titleLabel]"
                                                                       options:0
-                                                                      metrics:nil
+                                                                      metrics:metrics
                                                                         views:NSDictionaryOfVariableBindings(titleLabel)]];
     
     for (NSUInteger i=0; i < [buttons count]; i++) {
@@ -170,9 +170,9 @@
                                                                       metrics:metrics
                                                                         views:views]];
         
-        [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[button(==280)]-|"
+        [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==margin)-[button(>=margin)]-(==margin)-|"
                                                                       options:0
-                                                                      metrics:nil
+                                                                      metrics:metrics
                                                                         views:views]];
         
         if (i== ([buttons count]-1)) { //Bottom item is also pinned to the bottom
@@ -273,6 +273,8 @@
 - (void)didSelectButton:(UIButton *)aButton
 {
     [self handlerBlock](self,[aButton tag]);
+    
+    [self dismiss];
 }
 
 #pragma mark - Utilities
