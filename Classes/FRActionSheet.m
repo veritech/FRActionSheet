@@ -135,6 +135,8 @@
     
     [titleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     
+    [titleLabel setPreferredMaxLayoutWidth:280.0f];
+    
     [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==margin)-[titleLabel]-(==margin)-|"
                                                                       options:0
                                                                       metrics:metrics
