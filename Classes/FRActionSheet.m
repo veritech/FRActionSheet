@@ -133,6 +133,8 @@
     NSDictionary *metrics = @{@"margin":@20};
     UIButton *button;
     
+    [titleLabel setNumberOfLines:0];
+    
     [titleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
     
     [titleLabel setPreferredMaxLayoutWidth:280.0f];
@@ -274,8 +276,10 @@
 
 - (void)didSelectButton:(UIButton *)aButton
 {
-    [self handlerBlock](self,[aButton tag]);
-    
+    if ([self handlerBlock]){
+        [self handlerBlock](self,[aButton tag]);
+    }
+
     [self dismiss];
 }
 
