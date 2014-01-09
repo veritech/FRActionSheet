@@ -15,6 +15,7 @@
 - (UIButton *)buttonWithTitle:(NSString *)aTitle
                       atIndex:(NSInteger)aIdx;
 - (NSArray *)allButtonsInView:(UIView *)aView;
+- (FRActionSheetHandlerBlock)handlerBlock;
 
 @end
 
@@ -22,27 +23,47 @@
 
 @property (nonatomic,strong) UIActivityIndicatorView *activityIndicatorView;
 @property (nonatomic,strong) UIPickerView *pickerView;
+@property (nonatomic,copy) NSArray *buttonTitles;
 
 @end
+
+#define kOptionsTitlesKeyPath @"optionTitles"
 
 @implementation FRPickerActionSheet
 
 - (id)initWithTitle:(NSString *)aString
             handler:(FRActionSheetHandlerBlock)aBlock
 {
-    
-    self = [self initWithTitle:aString
-                 buttonsTitles:@[NSLocalizedString(@"Accept",nil),NSLocalizedString(@"Cancel", nil)]
+    return [self initWithTitle:aString
+                 buttonsTitles:nil
                        handler:aBlock];
+}
+
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
     if (self) {
-        
         [self addObserver:self
-               forKeyPath:@"buttonTitles"
+               forKeyPath:kOptionsTitlesKeyPath
                   options:NSKeyValueObservingOptionNew
                   context:NULL];
-        
+
     }
     return self;
+}
+
+- (id)initWithTitle:(NSString *)aString
+      buttonsTitles:(NSArray *)buttonTitles
+            handler:(FRActionSheetHandlerBlock)aBlock
+{
+
+    return [super initWithTitle:aString
+                  buttonsTitles:@[
+                                  NSLocalizedString(@"Accept",nil),
+                                  NSLocalizedString(@"Cancel", nil)
+                                  ]
+                        handler:aBlock];
+    
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -50,9 +71,15 @@
                         change:(NSDictionary *)change
                        context:(void *)context
 {
-    if ([keyPath isEqualToString:@"buttonTitles"]) {
-        [[self activityIndicatorView] setHidden:YES];
-        [[self pickerView] setHidden:NO];
+    if ([keyPath isEqualToString:kOptionsTitlesKeyPath]) {
+        if ([self optionTitles]) {
+            [[self pickerView] setHidden:NO];
+            [[self activityIndicatorView] setHidden:YES];
+        }
+        else {
+            [[self pickerView] setHidden:YES];
+            [[self activityIndicatorView] setHidden:NO];
+        }
         [[self pickerView] reloadAllComponents];
     }
 }
@@ -60,7 +87,7 @@
 - (void)dealloc
 {
     [self removeObserver:self
-              forKeyPath:@"buttonTitles"];
+              forKeyPath:kOptionsTitlesKeyPath];
 }
 
 - (UIView *)sheetViewWithTitle:(NSString *)aTitle
@@ -84,10 +111,9 @@
         [sheetView addSubview:button];
     }
     
-    [[self pickerView] setHidden:YES];
     [sheetView addSubview:[self activityIndicatorView]];
     [sheetView addSubview:[self pickerView]];
-    
+
     [self layoutTitleLabel:titleLabel
                    buttons:[self allButtonsInView:sheetView]
                     inView:sheetView];
@@ -123,7 +149,7 @@
     if (!_activityIndicatorView) {
         _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         
-        [_activityIndicatorView startAnimating];
+//        [_activityIndicatorView startAnimating];
     }
     return _activityIndicatorView;
 }
@@ -150,7 +176,7 @@
 - (NSInteger)pickerView:(UIPickerView *)pickerView
 numberOfRowsInComponent:(NSInteger)component
 {
-    return [[self buttonTitles] count];
+    return [[self optionTitles] count];
 }
 
 #pragma mark - UIPickerViewDelegate
@@ -158,7 +184,22 @@ numberOfRowsInComponent:(NSInteger)component
              titleForRow:(NSInteger)row
             forComponent:(NSInteger)component
 {
-    return [[self buttonTitles] objectAtIndex:row];
+    return [[self optionTitles] objectAtIndex:row];
+}
+
+- (void)didSelectButton:(UIButton *)aButton
+{
+    
+    if ([self handlerBlock]){
+        if ([aButton tag] == 0) {
+            [self handlerBlock](self,[[self pickerView] selectedRowInComponent:0]);
+        }
+        else {
+            [self handlerBlock](self,-1);
+        }
+    }
+    
+    [self dismiss];
 }
 
 #pragma mark -

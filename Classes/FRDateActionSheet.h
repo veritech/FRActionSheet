@@ -7,6 +7,10 @@
 
 #import "FRActionSheet.h"
 
+@class FRDateActionSheet;
+
+typedef void(^FRDateActionSheetHandlerBlock)(FRDateActionSheet *sheet, NSDate *date);
+
 @interface FRDateActionSheet : FRActionSheet
 
 /**
@@ -20,7 +24,7 @@
         minimumDate:(NSDate *)startDate
         maximumDate:(NSDate *)endDate
      datePickerMode:(UIDatePickerMode)mode
-            handler:(FRActionSheetHandlerBlock)aBlock;
+            handler:(FRDateActionSheetHandlerBlock)aBlock;
 
 
 @end

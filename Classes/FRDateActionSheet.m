@@ -18,9 +18,10 @@
 
 @interface FRDateActionSheet()
 
+@property (nonatomic,copy) FRDateActionSheetHandlerBlock handlerBlock;
 @property (nonatomic,copy) NSDate *maximumDate;
 @property (nonatomic,copy) NSDate *minimumDate;
-@property (nonatomic,assign) UIDatePickerMode *pickerMode;
+@property (nonatomic,assign) UIDatePickerMode pickerMode;
 
 @end
 
@@ -33,13 +34,14 @@
         minimumDate:(NSDate *)startDate
         maximumDate:(NSDate *)endDate
      datePickerMode:(UIDatePickerMode)mode
-            handler:(FRActionSheetHandlerBlock)aBlock
+            handler:(FRDateActionSheetHandlerBlock)aBlock
 {
     
     self = [self initWithTitle:aString
                  buttonsTitles:@[NSLocalizedString(@"Accept",nil),NSLocalizedString(@"Cancel", nil)]
-                       handler:aBlock];
+                       handler:nil];
     if (self) {
+        [self setHandlerBlock:aBlock];
         [self setMinimumDate:startDate];
         [self setMaximumDate:endDate];
         [self setPickerMode:mode];
@@ -101,7 +103,6 @@
  
     NSDictionary *views;
     NSDictionary *metrics = @{@"margin":@20};
-    UIButton *button;
     
     views = @{
               @"okButton":[buttons firstObject],
@@ -144,6 +145,15 @@
                                                                   metrics:metrics
                                                                     views:views]];
 
+}
+
+- (void)didSelectButton:(UIButton *)aButton
+{
+    if ([self handlerBlock]){
+        [self handlerBlock](self,[[self datePickerView] date]);
+    }
+    
+    [self dismiss];
 }
 
 @end

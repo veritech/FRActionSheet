@@ -8,9 +8,14 @@
 
 #import "FRActionSheet.h"
 
+typedef NS_OPTIONS(NSInteger, FRPickerActionSheetOption){
+    FRPickerActionSheetOptionAccept,
+    FRPickerActionSheetOptionCancel
+};
+
 @interface FRPickerActionSheet : FRActionSheet
 
-@property (nonatomic,copy) NSArray *buttonTitles;
+@property (nonatomic,copy) NSArray *optionTitles;
 
 - (id)initWithTitle:(NSString *)aString
             handler:(FRActionSheetHandlerBlock)aBlock;
