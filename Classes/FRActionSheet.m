@@ -6,7 +6,7 @@
 
 #import "FRActionSheet.h"
 
-@interface FRActionSheet ()
+@interface FRActionSheet ()<UIGestureRecognizerDelegate>
 
 @property (nonatomic,weak) UIView *sheetView;
 
@@ -197,6 +197,7 @@
 
     UIView *sheetView;
     CGRect sheetFrame = CGRectZero;
+    UITapGestureRecognizer *tapGesture;
     
     //Use a nib?
     if ([self nibName]) {
@@ -237,10 +238,14 @@
     [[view superview] addSubview:self];
 
     //Setup the overlay catcher
-    [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                       action:@selector(dismiss)]];
+    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                         action:@selector(dismiss)];
     
-    [[[self gestureRecognizers] firstObject] setNumberOfTapsRequired:1];
+    [tapGesture setNumberOfTapsRequired:1];
+    
+    [tapGesture setDelegate:self];
+    
+    [self addGestureRecognizer:tapGesture];
     
     [self setUserInteractionEnabled:YES];
     
@@ -281,6 +286,19 @@
     }
 
     [self dismiss];
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+/**
+ *  Stop the view disappearing from any touches other than the button and the dimmed area
+ */
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+       shouldReceiveTouch:(UITouch *)touch
+{
+    if ([[touch view] isEqual:self]) {
+        return YES;
+    }
+    return NO;
 }
 
 #pragma mark - Utilities

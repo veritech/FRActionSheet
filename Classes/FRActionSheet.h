@@ -9,6 +9,7 @@
 
 @protocol FRActionSheetDecorator <NSObject>
 
+@optional
 /**
  *  Provide a label with the give title
  */
@@ -24,7 +25,7 @@
 
 @end
 
-typedef void(^FRActionSheetHandlerBlock)(FRActionSheet *sheet, NSInteger idx);
+typedef void(^FRActionSheetHandlerBlock)(id sheet, NSInteger idx);
 
 @interface FRActionSheet : UIView
 
