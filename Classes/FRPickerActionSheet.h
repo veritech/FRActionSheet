@@ -15,7 +15,11 @@ typedef NS_OPTIONS(NSInteger, FRPickerActionSheetOption){
 
 @interface FRPickerActionSheet : FRActionSheet
 
-@property (nonatomic,copy) NSArray *optionTitles;
+///The Keys are displayed, values are provided
+@property (nonatomic,copy) NSDictionary *pickerOptions;
+@property (nonatomic,copy) NSArray *sortDescriptors;
+
+- (NSArray *)sortedPickerOptionKeys;
 
 - (id)initWithTitle:(NSString *)aString
             handler:(FRActionSheetHandlerBlock)aBlock;

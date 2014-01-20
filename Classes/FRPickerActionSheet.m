@@ -27,7 +27,7 @@
 
 @end
 
-#define kOptionsTitlesKeyPath @"optionTitles"
+#define kOptionsTitlesKeyPath @"pickerOptions"
 
 @implementation FRPickerActionSheet
 
@@ -72,7 +72,7 @@
                        context:(void *)context
 {
     if ([keyPath isEqualToString:kOptionsTitlesKeyPath]) {
-        if ([self optionTitles]) {
+        if ([self pickerOptions]) {
             [[self pickerView] setHidden:NO];
             [[self activityIndicatorView] setHidden:YES];
         }
@@ -90,13 +90,17 @@
               forKeyPath:kOptionsTitlesKeyPath];
 }
 
+- (NSArray *)sortedPickerOptionKeys
+{
+    return [[[self pickerOptions] allKeys] sortedArrayUsingDescriptors:[self sortDescriptors]];
+}
+
 - (UIView *)sheetViewWithTitle:(NSString *)aTitle
                   buttonTitles:(NSArray *)buttons
 {
     
     UILabel *titleLabel;
     UIButton *button;
-    UIPickerView *picker;
     UIView *sheetView = [[UIView alloc] initWithFrame:CGRectZero];
     
     titleLabel = [self labelWithTitle:aTitle];
@@ -176,7 +180,7 @@
 - (NSInteger)pickerView:(UIPickerView *)pickerView
 numberOfRowsInComponent:(NSInteger)component
 {
-    return [[self optionTitles] count];
+    return [[self pickerOptions] count];
 }
 
 #pragma mark - UIPickerViewDelegate
@@ -184,7 +188,7 @@ numberOfRowsInComponent:(NSInteger)component
              titleForRow:(NSInteger)row
             forComponent:(NSInteger)component
 {
-    return [[self optionTitles] objectAtIndex:row];
+    return [[self sortedPickerOptionKeys] objectAtIndex:row];
 }
 
 - (void)didSelectButton:(UIButton *)aButton
@@ -211,7 +215,6 @@ numberOfRowsInComponent:(NSInteger)component
     
     NSDictionary *views;
     NSDictionary *metrics = @{@"margin":@20};
-    UIButton *button;
     
     views = @{
               @"okButton":[buttons firstObject],
