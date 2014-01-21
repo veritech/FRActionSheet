@@ -11,6 +11,8 @@
 
 typedef void(^FRDateActionSheetHandlerBlock)(FRDateActionSheet *sheet, NSDate *date);
 
+const static NSInteger FRDateActionSheetMonthMode = 128;
+
 @interface FRDateActionSheet : FRActionSheet
 
 /**
@@ -23,7 +25,7 @@ typedef void(^FRDateActionSheetHandlerBlock)(FRDateActionSheet *sheet, NSDate *d
 - (id)initWithTitle:(NSString *)aString
         minimumDate:(NSDate *)startDate
         maximumDate:(NSDate *)endDate
-     datePickerMode:(UIDatePickerMode)mode
+     datePickerMode:(NSInteger)mode
             handler:(FRDateActionSheetHandlerBlock)aBlock;
 
 

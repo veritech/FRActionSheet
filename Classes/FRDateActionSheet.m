@@ -16,12 +16,13 @@
 
 @end
 
-@interface FRDateActionSheet()
+@interface FRDateActionSheet()<UIPickerViewDataSource,UIPickerViewDelegate>
 
 @property (nonatomic,copy) FRDateActionSheetHandlerBlock handlerBlock;
 @property (nonatomic,copy) NSDate *maximumDate;
 @property (nonatomic,copy) NSDate *minimumDate;
-@property (nonatomic,assign) UIDatePickerMode pickerMode;
+@property (nonatomic,assign) NSInteger pickerMode;
+@property (nonatomic,strong) NSDateFormatter *dateFormatter;
 
 @end
 
@@ -33,7 +34,7 @@
 - (id)initWithTitle:(NSString *)aString
         minimumDate:(NSDate *)startDate
         maximumDate:(NSDate *)endDate
-     datePickerMode:(UIDatePickerMode)mode
+     datePickerMode:(NSInteger)mode
             handler:(FRDateActionSheetHandlerBlock)aBlock
 {
     
@@ -57,7 +58,7 @@
     
     UILabel *titleLabel;
     UIButton *button;
-    UIDatePicker *datePicker;
+    id datePicker;
     UIView *sheetView = [[UIView alloc] initWithFrame:CGRectZero];
     
     titleLabel = [self labelWithTitle:aTitle];
@@ -72,11 +73,20 @@
         [sheetView addSubview:button];
     }
     
-    datePicker = [[UIDatePicker alloc] initWithFrame:CGRectZero];
-    
-    [datePicker setMaximumDate:[self maximumDate]];
-    [datePicker setMinimumDate:[self minimumDate]];
-    [datePicker setDatePickerMode:[self pickerMode]];
+    if ([self pickerMode] == FRDateActionSheetMonthMode) {
+        
+        datePicker = [[UIPickerView alloc] initWithFrame:CGRectZero];
+        
+        [datePicker setDelegate:self];
+        
+    }
+    else {
+        datePicker = [[UIDatePicker alloc] initWithFrame:CGRectZero];
+        
+        [datePicker setMaximumDate:[self maximumDate]];
+        [datePicker setMinimumDate:[self minimumDate]];
+        [datePicker setDatePickerMode:[self pickerMode]];
+    }
     
     [datePicker setTag:20];
     
@@ -89,9 +99,82 @@
     return sheetView;
 }
 
+#pragma mark -
 - (UIDatePicker *)datePickerView
 {
     return (UIDatePicker *)[[self sheetView] viewWithTag:20];
+}
+
+- (UIPickerView *)pickerView
+{
+    return (UIPickerView *)[[self sheetView] viewWithTag:20];
+}
+
+#pragma mark - UIPickerDataSource
+- (NSString *)pickerView:(UIPickerView *)pickerView
+             titleForRow:(NSInteger)row
+            forComponent:(NSInteger)component
+{
+    return [[self localizedMonths] objectAtIndex:row];
+}
+
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)pickerView
+numberOfRowsInComponent:(NSInteger)component
+{
+    return [[self localizedMonths] count];;
+}
+
+#pragma mark -
+- (NSArray *)localizedMonths
+{
+    static NSArray *localizedMonths;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSMutableArray *months;
+        NSRange range;
+        
+        range = [[NSCalendar currentCalendar] rangeOfUnit:NSMonthCalendarUnit
+                                                   inUnit:NSYearCalendarUnit
+                                                  forDate:[NSDate date]];
+        
+        months = [NSMutableArray arrayWithCapacity:range.length];
+        
+        for (NSInteger i=1; i<=range.length;i++){
+            [months addObject:[[self dateFormater] stringFromDate:[self dateWithMonth:i]]];
+        }
+        
+        localizedMonths = [months copy];
+    });
+    
+    return localizedMonths;
+}
+
+- (NSDateFormatter *)dateFormater
+{
+    if (!_dateFormatter) {
+        _dateFormatter = [[NSDateFormatter alloc] init];
+        
+        [_dateFormatter setDateFormat:@"MMMM"];
+    }
+    return _dateFormatter;
+}
+
+- (NSDate *)dateWithMonth:(NSInteger)aMonth
+{
+    NSDateComponents *components;
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    
+    components = [calendar components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
+                             fromDate:[NSDate date]];
+    
+    [components setMonth:aMonth];
+    
+    return [calendar dateFromComponents:components];
 }
 
 #pragma mark - Layout
@@ -149,7 +232,10 @@
 
 - (void)didSelectButton:(UIButton *)aButton
 {
-    if ([self handlerBlock]){
+    if ([self handlerBlock] && [self pickerMode] == FRDateActionSheetMonthMode){
+        [self handlerBlock](self,[self dateWithMonth:[[self pickerView] selectedRowInComponent:0]+1]);
+    }
+    else {
         [self handlerBlock](self,[[self datePickerView] date]);
     }
     
