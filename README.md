@@ -37,6 +37,22 @@ If you want to customize the internal layout of the buttons, and still don't wan
 
 This class using Auto layout internally (Because it's awesome), but can be used in views that do not support it.
 
+Pero, Espera hay mas!
+---------------------
+There are also a series of subclasses for creating different types of actionsheets
+
+FRDateActionSheet
+=================
+An actionsheet with a date picker. Supports all the formats of UIDatePicker and a month picker.
+
+FRPickerActionSheet
+===================
+An actionsheet with a UIPickerView view, the contents of picker can be supplied as a dictionary.
+
+FRNetworkedPickerActionSheet
+============================
+Exactly the same as above, but you can supply a NSURLRequest (aka it will work authenticated API's!) and the keypath in your JSON that you want to extract your entries from. Que Chevere!
+
 Author
 ------
 [Jonathan Dalrymple](http://twitter.com/veritech)

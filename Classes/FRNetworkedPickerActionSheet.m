@@ -6,7 +6,7 @@
 //
 //
 
-#import "FRPickerActionSheet.h"
+#import "FRNetworkedPickerActionSheet.h"
 
 @interface FRPickerActionSheet (protected)
 
@@ -19,247 +19,94 @@
 
 @end
 
-@interface FRPickerActionSheet ()<UIPickerViewDataSource,UIPickerViewDelegate>
+@interface FRNetworkedPickerActionSheet ()
+//
+//@property (nonatomic,strong) UIActivityIndicatorView *activityIndicatorView;
+//@property (nonatomic,strong) UIPickerView *pickerView;
+//@property (nonatomic,copy) NSArray *buttonTitles;
 
-@property (nonatomic,strong) UIActivityIndicatorView *activityIndicatorView;
-@property (nonatomic,strong) UIPickerView *pickerView;
-@property (nonatomic,copy) NSArray *buttonTitles;
+@property (nonatomic,strong) NSURLRequest *URLRequest;
+@property (nonatomic,strong) NSString *JSONKeyPath;
+@property (nonatomic,copy) FRNetworkedPickerActionSheetMappingBlock mappingBlock;
 
 @end
 
 #define kOptionsTitlesKeyPath @"pickerOptions"
 
-@implementation FRPickerActionSheet
+@implementation FRNetworkedPickerActionSheet
 
 - (id)initWithTitle:(NSString *)aString
+            request:(NSURLRequest *)aRequest
+            keyPath:(NSString *)aKeyPath
+            mapping:(FRNetworkedPickerActionSheetMappingBlock)mappingBlock
             handler:(FRActionSheetHandlerBlock)aBlock
 {
-    return [self initWithTitle:aString
-                 buttonsTitles:nil
-                       handler:aBlock];
-}
-
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
+    self = [super initWithTitle:aString
+                        handler:aBlock];
+    
     if (self) {
-        [self addObserver:self
-               forKeyPath:kOptionsTitlesKeyPath
-                  options:NSKeyValueObservingOptionNew
-                  context:NULL];
-
+        [self setURLRequest:aRequest];
+        [self setJSONKeyPath:aKeyPath];
+        [self setMappingBlock:mappingBlock];
     }
     return self;
 }
 
-- (id)initWithTitle:(NSString *)aString
-      buttonsTitles:(NSArray *)buttonTitles
-            handler:(FRActionSheetHandlerBlock)aBlock
+- (void)showInView:(UIView *)aView
 {
+    [super showInView:aView];
+    
+    NSOperationQueue *operationQueue;
+    
+    operationQueue = [[NSOperationQueue alloc] init];
+    
+    [operationQueue setName:@"com.float-right.FRNetworkedPickerActionSheet"];
+    
+    [[self activityIndicatorView] startAnimating];
+    
+    [NSURLConnection sendAsynchronousRequest:[self URLRequest]
+                                       queue:operationQueue
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+                              
+                               id JSON;
+                               NSError *error;
+                               NSDictionary *options;
+                               NSUInteger statusCode = 0;
+                               
+                               if ([response respondsToSelector:@selector(statusCode)]) {
+                                   NSLog(@"Status code %d",[(NSHTTPURLResponse *)response statusCode]);
+                                   statusCode = [(NSHTTPURLResponse *)response statusCode];
+                               }
+                               
+                               if (statusCode == 200 && (JSON = [NSJSONSerialization JSONObjectWithData:data
+                                                                                                options:0
+                                                                                                  error:&error])){
+                                   
+                                   options = [self optionsDictionaryWithJSON:JSON];
+                                   
+                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                       [self setPickerOptions:options];
+                                   });
+                               }
+                               else {
+                                   NSLog(@"Error %d %@",statusCode,error);
+                               }
+                           }];
+}
 
-    return [super initWithTitle:aString
-                  buttonsTitles:@[
-                                  NSLocalizedString(@"Accept",nil),
-                                  NSLocalizedString(@"Cancel", nil)
-                                  ]
-                        handler:aBlock];
+- (void)handleError
+{
     
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context
+- (NSDictionary *)optionsDictionaryWithJSON:(id)JSON
 {
-    if ([keyPath isEqualToString:kOptionsTitlesKeyPath]) {
-        if ([self pickerOptions]) {
-            [[self pickerView] setHidden:NO];
-            [[self activityIndicatorView] setHidden:YES];
-        }
-        else {
-            [[self pickerView] setHidden:YES];
-            [[self activityIndicatorView] setHidden:NO];
-        }
-        [[self pickerView] reloadAllComponents];
+    NSMutableDictionary *options = [NSMutableDictionary dictionary];
+    
+    for (id object in [JSON valueForKeyPath:[self JSONKeyPath]]) {
+        [options addEntriesFromDictionary:[self mappingBlock](object)];
     }
-}
-
-- (void)dealloc
-{
-    [self removeObserver:self
-              forKeyPath:kOptionsTitlesKeyPath];
-}
-
-- (NSArray *)sortedPickerOptionKeys
-{
-    return [[[self pickerOptions] allKeys] sortedArrayUsingDescriptors:[self sortDescriptors]];
-}
-
-- (UIView *)sheetViewWithTitle:(NSString *)aTitle
-                  buttonTitles:(NSArray *)buttons
-{
-    
-    UILabel *titleLabel;
-    UIButton *button;
-    UIView *sheetView = [[UIView alloc] initWithFrame:CGRectZero];
-    
-    titleLabel = [self labelWithTitle:aTitle];
-    
-    [sheetView addSubview:titleLabel];
-    
-    for (NSUInteger i=0; i< [buttons count]; i++) {
-        
-        button = [self buttonWithTitle:[buttons objectAtIndex:i]
-                               atIndex:i];
-        
-        [sheetView addSubview:button];
-    }
-    
-    [sheetView addSubview:[self activityIndicatorView]];
-    [sheetView addSubview:[self pickerView]];
-
-    [self layoutTitleLabel:titleLabel
-                   buttons:[self allButtonsInView:sheetView]
-                    inView:sheetView];
-    
-    return sheetView;
-}
-
-- (void)layoutActivityViewInView:(UIView *)aView
-{
-    
-    [aView addSubview:[self activityIndicatorView]];
-    
-    [aView addConstraint:[NSLayoutConstraint constraintWithItem:aView
-                                                      attribute:NSLayoutAttributeCenterX
-                                                      relatedBy:NSLayoutRelationEqual
-                                                         toItem:[self activityIndicatorView]
-                                                      attribute:NSLayoutAttributeCenterX
-                                                     multiplier:1.0f
-                                                       constant:0.0f]];
-    
-    [aView addConstraint:[NSLayoutConstraint constraintWithItem:aView
-                                                      attribute:NSLayoutAttributeCenterY
-                                                      relatedBy:NSLayoutRelationEqual
-                                                         toItem:[self activityIndicatorView]
-                                                      attribute:NSLayoutAttributeCenterY
-                                                     multiplier:1.0f
-                                                       constant:0.0f]];
-    
-}
-
-- (UIActivityIndicatorView *)activityIndicatorView
-{
-    if (!_activityIndicatorView) {
-        _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        
-//        [_activityIndicatorView startAnimating];
-    }
-    return _activityIndicatorView;
-}
-
-- (UIPickerView *)pickerView
-{
-    if (!_pickerView) {
-        _pickerView = [[UIPickerView alloc] initWithFrame:CGRectZero];
-        
-        [_pickerView setDelegate:self];
-        
-        [_pickerView setDataSource:self];
-    }
-    
-    return _pickerView;
-}
-
-#pragma mark - UIPickerViewDataSource
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-    return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView
-numberOfRowsInComponent:(NSInteger)component
-{
-    return [[self pickerOptions] count];
-}
-
-#pragma mark - UIPickerViewDelegate
-- (NSString *)pickerView:(UIPickerView *)pickerView
-             titleForRow:(NSInteger)row
-            forComponent:(NSInteger)component
-{
-    return [[self sortedPickerOptionKeys] objectAtIndex:row];
-}
-
-- (void)didSelectButton:(UIButton *)aButton
-{
-    
-    if ([self handlerBlock]){
-        if ([aButton tag] == 0) {
-            [self handlerBlock](self,[[self pickerView] selectedRowInComponent:0]);
-        }
-        else {
-            [self handlerBlock](self,-1);
-        }
-    }
-    
-    [self dismiss];
-}
-
-#pragma mark -
-///Customize the layout by overloading this method
-- (void)layoutTitleLabel:(UILabel *)titleLabel
-                 buttons:(NSArray *)buttons
-                  inView:(UIView*)aView
-{
-    
-    NSDictionary *views;
-    NSDictionary *metrics = @{@"margin":@20};
-    
-    views = @{
-              @"okButton":[buttons firstObject],
-              @"cancelButton":[buttons lastObject],
-              @"titleLabel":titleLabel,
-              @"picker":[self pickerView],
-              @"activityIndicatorView":[self activityIndicatorView]
-              };
-    
-    [[views allValues] setValue:@NO
-                     forKeyPath:@"translatesAutoresizingMaskIntoConstraints"];
-    
-    [self layoutActivityViewInView:aView];
-    
-    //Vertical
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(<=margin)-[titleLabel]-[picker]-[okButton]-|"
-                                                                  options:0
-                                                                  metrics:metrics
-                                                                    views:views]];
-    
-    //Align the buttons
-    [aView addConstraint:[NSLayoutConstraint constraintWithItem:[views objectForKey:@"okButton"]
-                                                      attribute:NSLayoutAttributeCenterY
-                                                      relatedBy:NSLayoutRelationEqual
-                                                         toItem:[views objectForKey:@"cancelButton"]
-                                                      attribute:NSLayoutAttributeCenterY
-                                                     multiplier:1.0f
-                                                       constant:0.0f]];
-    
-    //Horizontal layout
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==margin)-[titleLabel]-(==margin)-|"
-                                                                  options:0
-                                                                  metrics:metrics
-                                                                    views:views]];
-    
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[picker]-|"
-                                                                  options:0
-                                                                  metrics:metrics
-                                                                    views:views]];
-    
-    [aView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(==margin)-[okButton(==cancelButton)]-[cancelButton]-(==margin)-|"
-                                                                  options:0
-                                                                  metrics:metrics
-                                                                    views:views]];
-    
+    return [options copy];
 }
 
 @end

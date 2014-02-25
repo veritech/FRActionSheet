@@ -21,9 +21,10 @@
 
 @interface FRPickerActionSheet ()<UIPickerViewDataSource,UIPickerViewDelegate>
 
-@property (nonatomic,strong) UIActivityIndicatorView *activityIndicatorView;
-@property (nonatomic,strong) UIPickerView *pickerView;
+@property (nonatomic,strong,readwrite) UIActivityIndicatorView *activityIndicatorView;
+@property (nonatomic,strong,readwrite) UIPickerView *pickerView;
 @property (nonatomic,copy) NSArray *buttonTitles;
+@property (nonatomic,copy) NSArray *sortedPickerOptionKeys;
 
 @end
 
@@ -73,7 +74,9 @@
 {
     if ([keyPath isEqualToString:kOptionsTitlesKeyPath]) {
         if ([self pickerOptions]) {
+            [self setSortedPickerOptionKeys:nil];
             [[self pickerView] setHidden:NO];
+            [[self activityIndicatorView] stopAnimating];
             [[self activityIndicatorView] setHidden:YES];
         }
         else {
@@ -92,7 +95,13 @@
 
 - (NSArray *)sortedPickerOptionKeys
 {
-    return [[[self pickerOptions] allKeys] sortedArrayUsingDescriptors:[self sortDescriptors]];
+    if (!_sortedPickerOptionKeys) {
+        [self willChangeValueForKey:NSStringFromSelector(_cmd)];
+        _sortedPickerOptionKeys = [[[self pickerOptions] allKeys] sortedArrayUsingDescriptors:[self sortDescriptors]];
+        [self didChangeValueForKey:NSStringFromSelector(_cmd)];
+    }
+    
+    return _sortedPickerOptionKeys;
 }
 
 - (UIView *)sheetViewWithTitle:(NSString *)aTitle
@@ -153,7 +162,7 @@
     if (!_activityIndicatorView) {
         _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         
-//        [_activityIndicatorView startAnimating];
+        [_activityIndicatorView startAnimating];
     }
     return _activityIndicatorView;
 }

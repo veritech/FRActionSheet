@@ -1,33 +1,21 @@
 //
-//  FRPickerActionSheet.h
+//  FRNetworkedPickerActionSheet.h
 //  Pods
 //
-//  Created by Jonathan Dalrymple on 12/12/2013.
+//  Created by Jonathan Dalrymple on 24/02/2014.
 //
 //
 
-#import "FRActionSheet.h"
+#import "FRPickerActionSheet.h"
 
-typedef NS_OPTIONS(NSInteger, FRPickerActionSheetOption){
-    FRPickerActionSheetOptionAccept,
-    FRPickerActionSheetOptionCancel
-};
+typedef NSDictionary *(^FRNetworkedPickerActionSheetMappingBlock)(id obj);
 
-@interface FRPickerActionSheet : FRActionSheet
-
-///The Keys are displayed, values are provided
-@property (nonatomic,copy) NSDictionary *pickerOptions;
-@property (nonatomic,copy) NSArray *sortDescriptors;
-
-- (NSArray *)sortedPickerOptionKeys;
-
-- (id)initWithTitle:(NSString *)aString
-            handler:(FRActionSheetHandlerBlock)aBlock;
+@interface FRNetworkedPickerActionSheet : FRPickerActionSheet
 
 - (id)initWithTitle:(NSString *)aString
             request:(NSURLRequest *)aRequest
-      titlesKeyPath:(NSString *)titleKeyPath
-      valuesKeyPath:(NSString *)valueKeyPath
+            keyPath:(NSString *)aKeyPath
+            mapping:(FRNetworkedPickerActionSheetMappingBlock)mappingBlock
             handler:(FRActionSheetHandlerBlock)aBlock;
 
 @end

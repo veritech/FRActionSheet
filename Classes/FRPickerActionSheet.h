@@ -19,6 +19,9 @@ typedef NS_OPTIONS(NSInteger, FRPickerActionSheetOption){
 @property (nonatomic,copy) NSDictionary *pickerOptions;
 @property (nonatomic,copy) NSArray *sortDescriptors;
 
+@property (nonatomic,strong,readonly) UIActivityIndicatorView *activityIndicatorView;
+@property (nonatomic,strong,readonly) UIPickerView *pickerView;
+
 - (NSArray *)sortedPickerOptionKeys;
 
 - (id)initWithTitle:(NSString *)aString
