@@ -68,7 +68,7 @@ An actionsheet with a *UIPickerView*, the contents of picker can be supplied as 
 									
 													optionKey = [[sheet sortedPickerOptionKeys] objectAtIndex:idx];
 									
-													//The Value of assocated with the chosen key
+													//The Value assocated with the chosen key
 													[[sheet pickerOptions] objectForKey:optionKey];													
 												}];
 	
@@ -112,7 +112,7 @@ The request is loaded using NSURLConnection, and the parsing of the JSON is done
 									
 									optionKey = [[sheet sortedPickerOptionKeys] objectAtIndex:idx];
 									
-									//The Value of assocated with the chosen key
+									//The Value assocated with the chosen key
 									[[sheet pickerOptions] objectForKey:optionKey];
 									
 									}];
