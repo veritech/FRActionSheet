@@ -119,6 +119,16 @@ The request is loaded using NSURLConnection, and the parsing of the JSON is done
 									
 	[sheet showInView:aView]
 
+Change Log
+-----------
+
+* 0.0.2 (05/03/2014)
+	* Added notifications for when the sheet will/did appear/disappear
+
+* 0.0.1 (25/02/2014)
+	* Initial Release
+ 
+
 Author
 ------
 [Jonathan Dalrymple](http://twitter.com/veritech)
