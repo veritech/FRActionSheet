@@ -5,6 +5,18 @@
 //
 #import <UIKit/UIKit.h>
 
+///A Notification posted after the showInView: method is called, but before the view is presented
+extern NSString *const FRActionSheetWillAppearNotification;
+
+///A Notification posted after the showInView: method is called, and after the view is presented
+extern NSString *const FRActionSheetDidAppearNotification;
+
+///A Notification posted after the dismiss: method is called but before the view is removed
+extern NSString *const FRActionSheetWillDisappearNotification;
+
+///A Notification posted after the dismiss: method is called but after the view is removed
+extern NSString *const FRActionSheetDidDisappearNotification;
+
 @class FRActionSheet;
 
 @protocol FRActionSheetDecorator <NSObject>

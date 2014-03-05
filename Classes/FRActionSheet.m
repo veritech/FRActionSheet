@@ -6,6 +6,15 @@
 
 #import "FRActionSheet.h"
 
+
+NSString *const  FRActionSheetWillAppearNotification = @"FRActionSheetWillAppearNotification";
+
+NSString *const  FRActionSheetDidAppearNotification = @"FRActionSheetDidAppearNotification";
+
+NSString *const  FRActionSheetWillDisappearNotification = @"FRActionSheetWillDisappearNotification";
+
+NSString *const  FRActionSheetDidDisappearNotification = @"FRActionSheetDidDisappearNotification";
+
 @interface FRActionSheet ()<UIGestureRecognizerDelegate>
 
 @property (nonatomic,weak) UIView *sheetView;
@@ -199,6 +208,10 @@
     CGRect sheetFrame = CGRectZero;
     UITapGestureRecognizer *tapGesture;
     
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:FRActionSheetWillAppearNotification
+                                                        object:self];
+    
     //Use a nib?
     if ([self nibName]) {
         sheetView = [self sheetViewWithNibNamed:[self nibName]];
@@ -258,7 +271,10 @@
                          [self setBackgroundColor:[UIColor colorWithWhite:0.0f
                                                                     alpha:0.5f]];
                      }
-                     completion:nil];
+                     completion:^(BOOL completed){
+                         [[NSNotificationCenter defaultCenter] postNotificationName:FRActionSheetDidAppearNotification
+                                                                             object:self];
+                     }];
     
 }
 
@@ -268,6 +284,9 @@
     
     sheetFrame.origin.y += CGRectGetHeight(sheetFrame);
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:FRActionSheetWillDisappearNotification
+                                                        object:self];
+    
     [UIView animateWithDuration:kAnimationDuration
                      animations:^{
                          [[self sheetView] setFrame:sheetFrame];
@@ -275,6 +294,8 @@
                      }
                      completion:^(BOOL finished) {
                          [self removeFromSuperview];
+                         [[NSNotificationCenter defaultCenter] postNotificationName:FRActionSheetDidDisappearNotification
+                                                                             object:self];
                      }];
 
 }
