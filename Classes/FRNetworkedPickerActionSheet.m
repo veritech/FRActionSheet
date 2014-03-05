@@ -74,7 +74,7 @@
                                NSUInteger statusCode = 0;
                                
                                if ([response respondsToSelector:@selector(statusCode)]) {
-                                   NSLog(@"Status code %d",[(NSHTTPURLResponse *)response statusCode]);
+//                                   NSLog(@"Status code %d",[(NSHTTPURLResponse *)response statusCode]);
                                    statusCode = [(NSHTTPURLResponse *)response statusCode];
                                }
                                
