@@ -23,6 +23,7 @@
 @property (nonatomic,copy) NSDate *minimumDate;
 @property (nonatomic,assign) NSInteger pickerMode;
 @property (nonatomic,strong) NSDateFormatter *dateFormatter;
+@property (nonatomic,copy) NSDate *defaultDate;
 
 @end
 
@@ -31,6 +32,25 @@
 @implementation FRDateActionSheet
 
 #pragma mark - Object life cycle
+- (id)initWithTitle:(NSString *)aString
+        minimumDate:(NSDate *)startDate
+        maximumDate:(NSDate *)endDate
+        defaultDate:(NSDate *)aDate
+     datePickerMode:(NSInteger)mode
+            handler:(FRDateActionSheetHandlerBlock)aBlock
+{
+    
+    self = [self initWithTitle:aString
+                   minimumDate:startDate
+                   maximumDate:endDate
+                datePickerMode:mode
+                       handler:aBlock];
+    if (self) {
+        [self setDefaultDate:aDate];
+    }
+    return self;
+}
+
 - (id)initWithTitle:(NSString *)aString
         minimumDate:(NSDate *)startDate
         maximumDate:(NSDate *)endDate
@@ -79,6 +99,12 @@
         
         [datePicker setDelegate:self];
         
+        if ([self defaultDate]) {
+            [datePicker selectRow:([self monthForDate:[self defaultDate]] - 1)
+                      inComponent:0
+                         animated:NO];
+        }
+
     }
     else {
         datePicker = [[UIDatePicker alloc] initWithFrame:CGRectZero];
@@ -86,6 +112,10 @@
         [datePicker setMaximumDate:[self maximumDate]];
         [datePicker setMinimumDate:[self minimumDate]];
         [datePicker setDatePickerMode:[self pickerMode]];
+        
+        if ([self defaultDate]) {
+            [datePicker setDate:[self defaultDate]];
+        }
     }
     
     [datePicker setTag:20];
@@ -130,6 +160,15 @@ numberOfRowsInComponent:(NSInteger)component
 }
 
 #pragma mark -
+- (NSUInteger)monthForDate:(NSDate*)aDate
+{
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *components = [calendar components:NSCalendarUnitMonth
+                                               fromDate:aDate];
+    
+    return [components month];
+}
+
 - (NSArray *)localizedMonths
 {
     static NSArray *localizedMonths;

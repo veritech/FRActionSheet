@@ -28,5 +28,19 @@ const static NSInteger FRDateActionSheetMonthMode = 128;
      datePickerMode:(NSInteger)mode
             handler:(FRDateActionSheetHandlerBlock)aBlock;
 
+/**
+ *  @param Sheet title text
+ *  @param startDate
+ *  @param endDate
+ *  @param defaultDate
+ *  @param datePickerMode
+ *  @param aBlock
+ */
+- (id)initWithTitle:(NSString *)aString
+        minimumDate:(NSDate *)startDate
+        maximumDate:(NSDate *)endDate
+        defaultDate:(NSDate *)aDate
+     datePickerMode:(NSInteger)mode
+            handler:(FRDateActionSheetHandlerBlock)aBlock;
 
 @end
