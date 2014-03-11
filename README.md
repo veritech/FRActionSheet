@@ -122,6 +122,9 @@ The request is loaded using NSURLConnection, and the parsing of the JSON is done
 Change Log
 -----------
 
+* 0.0.3 (11/03/2014)
+	* Can set the default/initial date of a FRDataActionSheet
+
 * 0.0.2 (05/03/2014)
 	* Added notifications for when the sheet will/did appear/disappear
 
