@@ -271,7 +271,10 @@ numberOfRowsInComponent:(NSInteger)component
 
 - (void)didSelectButton:(UIButton *)aButton
 {
-    if ([self handlerBlock] && [self pickerMode] == FRDateActionSheetMonthMode){
+    if ([self handlerBlock] && [aButton tag] == 1) {   //Cancel button
+        [self handlerBlock](self,nil);
+    }
+    else if ([self handlerBlock] && [self pickerMode] == FRDateActionSheetMonthMode){
         [self handlerBlock](self,[self dateWithMonth:[[self pickerView] selectedRowInComponent:0]+1]);
     }
     else {
