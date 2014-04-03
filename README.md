@@ -121,6 +121,9 @@ The request is loaded using NSURLConnection, and the parsing of the JSON is done
 
 Change Log
 -----------
+* 0.0.4 (03/04/2014)
+	* Fixed issue with loading spinners
+	* Correctly handled the cancel button in FRDatePickers
 
 * 0.0.3 (11/03/2014)
 	* Can set the default/initial date of a FRDataActionSheet
