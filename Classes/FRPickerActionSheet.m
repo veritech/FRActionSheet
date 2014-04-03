@@ -58,13 +58,20 @@
             handler:(FRActionSheetHandlerBlock)aBlock
 {
 
-    return [super initWithTitle:aString
-                  buttonsTitles:@[
+    id obj = [super initWithTitle:aString
+                    buttonsTitles:@[
                                   NSLocalizedString(@"Accept",nil),
                                   NSLocalizedString(@"Cancel", nil)
                                   ]
                         handler:aBlock];
     
+    /**
+     *  Simply create a dictionary with equal key=>values
+     */
+    _pickerOptions = [NSDictionary dictionaryWithObjects:buttonTitles
+                                                 forKeys:buttonTitles];
+    
+    return obj;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
