@@ -23,7 +23,6 @@
 
 @property (nonatomic,strong,readwrite) UIActivityIndicatorView *activityIndicatorView;
 @property (nonatomic,strong,readwrite) UIPickerView *pickerView;
-@property (nonatomic,copy) NSArray *buttonTitles;
 @property (nonatomic,copy) NSArray *sortedPickerOptionKeys;
 
 @end
